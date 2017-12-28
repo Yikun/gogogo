@@ -47,7 +47,7 @@ func GetBlueprint(service string, version string) []*BluePrint {
 		// Get version
 		bp.Series = bpCol.Eq(5).Find("a").Text()
 		if bp.Series == "" {
-			bp.Series = "queens"
+			bp.Series = version
 		}
 		// append bp on l
 		l = append(l, bp)
