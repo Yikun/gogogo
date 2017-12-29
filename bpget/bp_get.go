@@ -56,18 +56,33 @@ func GetBlueprint(service string, version string) []*BluePrint {
 	return l
 }
 
-func getFileName(s string, v string) string {
+func getFileName(s string, v string, l string) string {
 	t := time.Now().Format("2006_01_02_15_04_05")
-	fileName := strings.Join([]string{s, v, t}, "_")
+	var fileName string
+	if l != "" {
+		fileName = l + strings.Join([]string{s, v, t}, "_")
+	} else {
+		fileName = strings.Join([]string{s, v, t}, "_")
+	}
+
 	return fileName + ".csv"
 }
 
 func main() {
 	servicePtr := flag.String("service", "nova", "The service name of OpenStack (nova, cinder...)")
 	versionPtr := flag.String("version", "queens", "The version of service (pike, queens...)")
+	locationPtr := flag.String("location", "", "The location of the output file. (D:\\folder, ..\\folder)")
 	flag.Parse()
 	service := *servicePtr
 	version := *versionPtr
+	location := *locationPtr
+	_, err := os.Stat(location)
+	if os.IsNotExist(err) {
+		if strings.HasSuffix(location, "\\") != true {
+			location = location + "\\"
+		}
+		os.MkdirAll(location, os.ModeDir)
+	}
 	bps := GetBlueprint(service, version)
 	records := [][]string{
 		{"Blueprint", "Priority", "Link", "Catagory", "Tag"},
@@ -82,7 +97,7 @@ func main() {
 	// w.WriteAll(records)
 
 	// Write csv to file
-	fileName := getFileName(service, version)
+	fileName := getFileName(service, version, location)
 	f, err := os.Create(fileName)
 	if err != nil {
 		panic(err)
